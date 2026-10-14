@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diario Personale Protetto - IE11</title>
+    <style>
+        body {
+            font-family: "Segoe UI", Arial, sans-serif;
+            background-color: #f0fdf4; /* Verde chiarissimo rilassante */
+            color: #2b2b2b;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 750px;
+            margin: 0 auto;
+        }
+        .header {
+            background-color: #0f766e; /* Teal scuro */
+            color: white;
+            padding: 20px;
+            border-radius: 3px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .card {
+            background: #ffffff;
+            padding: 20px;
+            border: 1px solid #ccfbf1;
+            border-radius: 3px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+        h2 {
+            margin-top: 0;
+            color: #0f766e;
+            border-bottom: 2px solid #0f766e;
+            padding-bottom: 5px;
+        }
+        textarea {
+            width: 96%;
+            padding: 10px;
+            font-size: 15px;
+            border: 1px solid #a1a1a1;
+            font-family: Georgia, serif;
+        }
+        input[type="number"] {
+            width: 80px;
+            padding: 6px;
+            font-size: 14px;
+        }
+        button {
+            background-color: #0f766e;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            font-size: 14px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #115e59;
+        }
+        .btn-azione {
+            background-color: #2563eb;
+        }
+        .btn-azione:hover {
+            background-color: #1d4ed8;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>Diario Personale & Blocco Note Protetto</h1>
+        <p>Scrivi e proteggi i tuoi testi con una chiave numerica locale (Compatibile IE11)</p>
+    </div>
+
+    <div class="card">
+        <h2>✍️ Scrivi una nuova pagina del tuo diario</h2>
+        <textarea id="testoDiario" rows="12" placeholder="Caro diario, oggi ho lavorato su un sistema storico..."></textarea>
+        
+        <div style="margin-top: 15px;">
+            <label style="font-weight: bold;">Chiave Numerica Segreta (da 1 a 25):</label>
+            <input type="number" id="chiaveSegreta" value="3" min="1" max="25">
+        </div>
+
+        <div style="margin-top: 15px;">
+            <button id="btnCifra" class="btn-azione">🔒 Offusca / Cifra Testo</button>
+            <button id="btnDecifra" style="background-color: #059669;">🔓 Decifra Testo Leggibile</button>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>💾 Esportazione e Pulizia</h2>
+        <p>Scarica il testo attualmente visualizzato sopra in un file sul tuo PC. Ricordati la chiave numerica per poterlo decifrare in futuro!</p>
+        <button id="btnScarica" style="background-color: #107c41; font-weight: bold;">💾 Scarica File Diario (.txt)</button>
+        <button id="btnSvuota" style="background-color: #dc2626; margin-left: 10px;">Svuota Schermata</button>
+    </div>
+</div>
+
+<script type="text/javascript">
+    var testoDiario = document.getElementById("testoDiario");
+    var chiaveSegreta = document.getElementById("chiaveSegreta");
+
+    // Funzione di Cifratura di Cesare (Compatibile ES5 / IE11)
+    function cifraCesare(testo, chiave) {
+        var risultato = "";
+        for (var i = 0; i < testo.length; i++) {
+            var codice = testo.charCodeAt(i);
+            
+            // Gestione lettere maiuscole
+            if (codice >= 65 && codice <= 90) {
+                risultato += String.fromCharCode(((codice - 65 + chiave) % 26) + 65);
+            }
+            // Gestione lettere minuscole
+            else if (codice >= 97 && codice <= 122) {
+                risultato += String.fromCharCode(((codice - 97 + chiave) % 26) + 97);
+            }
+            // Lascia invariati i numeri, spazi e punteggiatura
+            else {
+                risultato += testo.charAt(i);
+            }
+        }
+        return risultato;
+    }
+
+    // Bottone Cifra
+    document.getElementById("btnCifra").addEventListener("click", function() {
+        var chiave = parseInt(chiaveSegreta.value);
+        if (isNaN(chiave) || chiave < 1 || chiave > 25) {
+            alert("Inserisci una chiave numerica valida compresa tra 1 e 25.");
+            return;
+        }
+        testoDiario.value = cifraCesare(testoDiario.value, chiave);
+    });
+
+    // Bottone Decifra (basta invertire la chiave sottraendola da 26)
+    document.getElementById("btnDecifra").addEventListener("click", function() {
+        var chiave = parseInt(chiaveSegreta.value);
+        if (isNaN(chiave) || chiave < 1 || chiave > 25) {
+            alert("Inserisci una chiave numerica valida compresa tra 1 e 25.");
+            return;
+        }
+        var chiaveInversa = 26 - chiave;
+        testoDiario.value = cifraCesare(testoDiario.value, chiaveInversa);
+    });
+
+    // Bottone Svuota
+    document.getElementById("btnSvuota").addEventListener("click", function() {
+        testoDiario.value = "";
+    });
+
+    // Scarica File TXT (Metodo nativo IE11)
+    document.getElementById("btnScarica").addEventListener("click", function() {
+        var testoDaSalvare = testoDiario.value;
+        if (testoDaSalvare.trim() === "") {
+            alert("L'area di testo è vuota. Scrivi qualcosa prima di scaricare.");
+            return;
+        }
+
+        if (window.navigator && window.navigator.msSaveOrOpenBlob) {
+            var blob = new Blob([testoDaSalvare], { type: "text/plain;charset=utf-8;" });
+            window.navigator.msSaveOrOpenBlob(blob, "pagina-diario.txt");
+        } else {
+            var elementoAncorato = document.createElement("a");
+            elementoAncorato.setAttribute("href", "data:text/plain;charset=utf-8," + encodeURIComponent(testoDaSalvare));
+            elementoAncorato.setAttribute("download", "pagina-diario.txt");
+            elementoAncorato.style.display = "none";
+            document.body.appendChild(elementoAncorato);
+            elementoAncorato.click();
+            document.body.removeChild(elementoAncorato);
+        }
+    });
+</script>
+
+</body>
+</html>
